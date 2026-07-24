@@ -3,6 +3,7 @@ name: Release APK Only
 on:
   push:
     branches: [ "master" ]
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: RelWithDebInfo
