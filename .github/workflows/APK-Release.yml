@@ -12,7 +12,6 @@ jobs:
   build-android-only:
     name: Android
     runs-on: ubuntu-24.04
-    if: ${{ vars.APK_ONLY != '' }}
 
     strategy:
       matrix:
