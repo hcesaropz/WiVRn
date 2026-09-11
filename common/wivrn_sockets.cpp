@@ -85,24 +85,14 @@ void wivrn::UDP::bind(sockaddr_in6 address)
 		throw std::system_error{errno, std::generic_category()};
 }
 
-void wivrn::UDP::connect(in6_addr address, int port)
+void wivrn::UDP::connect(sockaddr_in6 sa)
 {
-	sockaddr_in6 sa;
-	sa.sin6_family = AF_INET6;
-	sa.sin6_addr = address;
-	sa.sin6_port = htons(port);
-
 	if (::connect(fd, (sockaddr *)&sa, sizeof(sa)) < 0)
 		throw std::system_error{errno, std::generic_category()};
 }
 
-void wivrn::UDP::connect(in_addr address, int port)
+void wivrn::UDP::connect(sockaddr_in sa)
 {
-	sockaddr_in sa;
-	sa.sin_family = AF_INET;
-	sa.sin_addr = address;
-	sa.sin_port = htons(port);
-
 	if (::connect(fd, (sockaddr *)&sa, sizeof(sa)) < 0)
 		throw std::system_error{errno, std::generic_category()};
 }
@@ -173,17 +163,12 @@ wivrn::TCP::TCP(int fd)
 	init();
 }
 
-wivrn::TCP::TCP(in6_addr address, int port)
+wivrn::TCP::TCP(sockaddr_in6 sa)
 {
 	fd = socket(AF_INET6, SOCK_STREAM, 0);
 	if (fd < 0)
 		throw std::system_error{errno, std::generic_category()};
 	fcntl(fd, F_SETFD, FD_CLOEXEC);
-
-	sockaddr_in6 sa;
-	sa.sin6_family = AF_INET6;
-	sa.sin6_addr = address;
-	sa.sin6_port = htons(port);
 
 	if (connect(fd, (sockaddr *)&sa, sizeof(sa)) < 0)
 	{
@@ -194,17 +179,12 @@ wivrn::TCP::TCP(in6_addr address, int port)
 	init();
 }
 
-wivrn::TCP::TCP(in_addr address, int port)
+wivrn::TCP::TCP(sockaddr_in sa)
 {
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd < 0)
 		throw std::system_error{errno, std::generic_category()};
 	fcntl(fd, F_SETFD, FD_CLOEXEC);
-
-	sockaddr_in sa;
-	sa.sin_family = AF_INET;
-	sa.sin_addr = address;
-	sa.sin_port = htons(port);
 
 	if (connect(fd, (sockaddr *)&sa, sizeof(sa)) < 0)
 	{
@@ -255,10 +235,12 @@ std::pair<wivrn::deserialization_packet, sockaddr_in6> wivrn::UDP::receive_from_
 	sockaddr_in6 addr;
 	socklen_t addrlen = sizeof(addr);
 
-	size_t size = recvfrom(fd, nullptr, 0, MSG_PEEK | MSG_TRUNC, (sockaddr *)&addr, &addrlen);
+	ssize_t peeked = recvfrom(fd, nullptr, 0, MSG_PEEK | MSG_TRUNC, (sockaddr *)&addr, &addrlen);
+	if (peeked < 0)
+		throw std::system_error{errno, std::generic_category()};
 
-	auto buffer = std::make_shared_for_overwrite<uint8_t[]>(size);
-	ssize_t received = recvfrom(fd, buffer.get(), size, 0, (sockaddr *)&addr, &addrlen);
+	auto buffer = std::make_shared_for_overwrite<uint8_t[]>(peeked);
+	ssize_t received = recvfrom(fd, buffer.get(), peeked, 0, (sockaddr *)&addr, &addrlen);
 	if (received < 0)
 		throw std::system_error{errno, std::generic_category()};
 

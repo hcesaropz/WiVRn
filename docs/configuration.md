@@ -155,9 +155,23 @@ Enables the Monado debug gui.
 ## `use-steamvr-lh`
 Default value: `false`
 
-Only available when built with `WIVRN_FEATURE_STEAMVR_LIGHTHOUSE`
+Only available when built with `WIVRN_FEATURE_STEAMVR_LIGHTHOUSE`.
 
 Enables the driver to load SteamVR Lighthouse devices.
+
+## `lh-max-extrapolation`
+Default value: unset
+
+Only available when built with `WIVRN_FEATURE_STEAMVR_LIGHTHOUSE`.
+
+Maximum time in milliseconds that poses may be extrapolated ahead for SteamVR Lighthouse devices.
+
+## `lh-stick-deadzone`
+Default value: `0`
+
+Only available when built with `WIVRN_FEATURE_STEAMVR_LIGHTHOUSE`
+
+Applies a deadzone to joysticks on SteamVR controllers (e.g. Index).
 
 ## `port`
 Default value: `9757`
